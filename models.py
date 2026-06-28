@@ -1,0 +1,233 @@
+"""
+MAI/IDL SS26 - Final assignment. 
+
+MG 6/6/2026
+"""
+import torch
+import torch.nn as nn
+
+activation_str = "ReLU"  # Placeholder for activation function, can be replaced with "ReLU" or others as needed.
+
+
+class VGGBlock(nn.Module):
+    """Modular VGG block with configurable number of conv layers and channels.
+
+    C configuration from Simonyan & Zisserman's VGG paper.
+    """
+    def __init__(self, in_channels, out_channels, num_convs, padding=1):
+        super().__init__()
+        layers = []
+        current_in_channels = in_channels
+        for i in range(num_convs):
+            is_config_c_tail = (num_convs == 3 and i == 2)
+            kernel_size = 1 if is_config_c_tail else 3
+            layers.append(nn.Conv2d(current_in_channels, out_channels, kernel_size=kernel_size, padding=padding))
+            layers.append(nn.BatchNorm2d(out_channels))
+            layers.append(nn.ReLU(inplace=True))
+            current_in_channels = out_channels  # Line added
+            
+        layers.append(nn.MaxPool2d(kernel_size=2, stride=2))
+        self.block = nn.Sequential(*layers)
+
+    def forward(self, x):
+        return self.block(x)
+
+
+class ResBlock(nn.Module):
+    """ResBlock with 3x3 convolutions (He et al., 2016)."""
+    def __init__(self, in_channels, out_channels, activation, stride=1):
+        super().__init__()
+        self.conv1 = nn.Conv2d(in_channels, out_channels, kernel_size=3, stride=stride, padding=1, bias=False)
+        self.bn1 = nn.BatchNorm2d(out_channels)
+        self.activation = activation
+        
+        self.conv2 = nn.Conv2d(out_channels, out_channels, kernel_size=3, stride=1, padding=1, bias=False)
+        self.bn2 = nn.BatchNorm2d(out_channels)
+
+        # If spatial size shrinks (stride > 1) or channels change, adjust the shortcut
+        self.shortcut = nn.Identity()
+        if stride != 1 or in_channels != out_channels:
+            self.shortcut = nn.Sequential(
+                nn.Conv2d(in_channels, out_channels, kernel_size=1, stride=stride, bias=False),
+                nn.BatchNorm2d(out_channels)
+            )
+
+    def forward(self, x):
+        identity = self.shortcut(x)
+        out = self.activation(self.bn1(self.conv1(x)))
+        out = self.bn2(self.conv2(out))
+        out += identity  
+        out = self.activation(out)
+        return out
+
+
+class AlexNet(nn.Module):
+    """AlexNet (Krizhevsky et al., 2012) adapted for smaller inputs."""
+    def __init__(self, **kwargs):
+        super().__init__()
+
+        drop_rate = kwargs.get("drop_rate", 0.5)
+        in_channels = kwargs.get("in_channels", 3)  # line added
+        
+        self.features = nn.Sequential(
+            nn.Conv2d(in_channels, 48, kernel_size=7, stride=2, padding=3),  
+            nn.BatchNorm2d(48),
+            nn.ReLU(inplace=True),
+            nn.MaxPool2d(kernel_size=3, stride=2, padding=1),
+            
+            nn.Conv2d(48, 128, kernel_size=5, padding=2),
+            nn.BatchNorm2d(128),
+            nn.ReLU(inplace=True),
+            nn.MaxPool2d(kernel_size=3, stride=2, padding=1),
+            
+            nn.Conv2d(128, 256, kernel_size=3, padding=1),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(256, 256, kernel_size=3, padding=1),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(256, 192, kernel_size=3, padding=1),
+            nn.ReLU(inplace=True),
+            nn.MaxPool2d(kernel_size=3, stride=2, padding=1),
+        )
+        
+        self.classifier = nn.Sequential(
+            nn.Dropout(p=drop_rate),
+            nn.Linear(3072, 1024),      # input size change: 2048 -> 3072
+            nn.ReLU(inplace=True),
+            nn.Dropout(p=drop_rate),
+            nn.Linear(1024, 1024),
+            nn.ReLU(inplace=True),
+            nn.Linear(1024, kwargs.get("num_classes", 2)),   # output class: 11 -> num_classes bcs we already define in train.py and getting it's value from config.js
+        )
+
+    def forward(self, x):
+        x = self.features(x)        # Extract SPATIAL features (what's where in the image)
+        x = torch.flatten(x, 1)      # Convert spatial grid → 1D vector
+        return self.classifier(x)       # Convert feature vector → class scores
+
+
+class VGG16(nn.Module):
+    """VGG16 in C configuration of Simonyan & Zisserman, (2014) adapted for smaller inputs."""
+    def __init__(self, in_channels, num_classes, **kwargs):
+        super().__init__()
+
+        drop_rate = kwargs.get("drop_rate", 0.5)
+
+        self.features = nn.Sequential(
+            VGGBlock(in_channels, 64, num_convs=2),
+            VGGBlock(64, 128, num_convs=2),
+            VGGBlock(128, 256, num_convs=3),
+            VGGBlock(256, 512, num_convs=3),
+            VGGBlock(512, 512, num_convs=3)
+        )
+
+        # Calculate flattened size dynamically
+        dummy_input = torch.randn(1, in_channels, 64, 64)
+        dummy_output = self.features(dummy_input)
+        flattened_size = dummy_output.view(1, -1).shape[1]
+        # dummy_output [1, 512, 3, 3]
+                # → .view(1, -1) → [1, 4608]
+                # → .shape → (1, 4608)
+                # → [1] → 4608
+        
+        self.classifier = nn.Sequential(
+            nn.Linear(flattened_size, 1024),
+            nn.ReLU(inplace=True),
+            nn.Dropout(p=drop_rate),
+            nn.Linear(1024, 512),
+            nn.ReLU(inplace=True),
+            nn.Dropout(p=drop_rate),
+            nn.Linear(512, num_classes)
+        )
+
+    def forward(self, x):
+        x = self.features(x)
+        # print(f"X shape {x.shape}")
+        x = torch.flatten(x, 1)
+        # print(f"After flatten X shape {x.shape}")
+        return self.classifier(x)
+
+
+class ResNet18(nn.Module):
+    """ResNet18 (He et al., 2016) adapted for smaller inputs.
+    
+    activation - flexible activation function to allow experimentation (e.g., ReLU, LeakyReLU, etc.)
+    """
+    def __init__(self, in_channels, num_classes, **kwargs):
+        super().__init__()
+
+        activation = getattr(nn, activation_str)
+
+        self.conv1 = nn.Conv2d(in_channels, 64, kernel_size=3, stride=1, padding=1, bias=False)
+        self.bn1 = nn.BatchNorm2d(64)
+        self.activation = activation(inplace=True)
+        print("Using activation function:", self.activation)
+        
+        self.stage1 = nn.Sequential(
+            ResBlock(64, 64, activation(inplace=True), stride=1),
+            ResBlock(64, 64, activation(inplace=True), stride=1)
+        )
+        self.stage2 = nn.Sequential(
+            ResBlock(64, 128, activation(inplace=True), stride=2),          
+            ResBlock(128, 128, activation(inplace=True), stride=1)
+        )
+        self.stage3 = nn.Sequential(
+            ResBlock(128, 256, activation(inplace=True), stride=2),
+            ResBlock(256, 256, activation(inplace=True), stride=1)
+        )
+        self.stage4 = nn.Sequential(
+            ResBlock(256, 512, activation(inplace=True), stride=2),
+            ResBlock(512, 512, activation(inplace=True), stride=1)
+        )
+        
+        self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
+        self.classifier = nn.Linear(512, num_classes)
+
+    def forward(self, x):
+        out = self.activation(self.bn1(self.conv1(x)))
+        out = self.stage1(out)
+        out = self.stage2(out)
+        out = self.stage3(out)
+        out = self.stage4(out)
+        out = self.avgpool(out)
+        out = torch.flatten(out, 1)
+        return self.classifier(out)
+
+
+
+
+
+# Info. ALEXNET
+# 1. Stride:
+# Stride is the number of pixels the filter moves horizontally and vertically at each step when scanning the input image.
+# Default stride is usually 1, meaning the filter moves one pixel at a time.
+# 
+# 
+# 2. Padding:
+# Without padding, each convolution reduces the spatial dimensions (height and width) of the output. This happens because the kernel cannot slide beyond the image edges.
+# Padding helps to:
+# Preserve spatial size:
+# With "same" padding, the output height and width remain the same as the input (when stride = 1).
+# Avoid losing edge information:
+# Without padding, border pixels are used fewer times in convolution, so edge features may be underrepresented.
+# Control output size:
+# By adjusting padding, you can control how much the output shrinks or stays the same.
+# 
+# 
+# 3. Max Pool:
+# MaxPooling shrinks the spatial dimensions (height × width) while keeping the most important features.
+# Visual example:
+# Input (4×4):          MaxPool2d(kernel=2, stride=2):    Output (2×2):
+# 9  2  3  1                                              9  3
+# 5  8  1  4            Takes max value in each 2×2       8  4
+# 2  7  6  5            sliding window
+# 1  3  2  9
+# It looks at small 2×2 windows and picks the maximum value from each window. This:
+# ✅ Reduces image size (less computation)
+# ✅ Keeps strongest features (important pixels survive)
+# ✅ Makes model robust to small shifts
+# 
+# 
+# 4. Maxpool2d - in first layer we're passing img 64*64 (H*W) then what will be next layer i/p & o/p
+# output_size = (input_size - kernel + 2*padding) / stride + 1  
+# 
+# 

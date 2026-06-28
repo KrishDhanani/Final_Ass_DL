@@ -1,0 +1,11 @@
+# Ignore large data files
+Data/*.pt
+
+# Ignore Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Ignore IDE
+.vscode/
+.idea/

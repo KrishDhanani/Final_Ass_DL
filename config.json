@@ -1,0 +1,17 @@
+{
+    "DATA": "cells.pt",
+
+    "DATA_PATH": "./Data/",
+
+    "BATCH_SIZE": 32,
+
+    "LEARNING_RATE": 0.01,
+
+    "EPOCHS": 50,
+
+    "MODEL": "ResNet18",
+
+    "CHANNELS": 3,
+
+    "NUM_CLASSES": 8
+}
