@@ -8,7 +8,7 @@ Create this file with instructions:
 
 ## Overview
 
-This is the restored and corrected ML pipeline for multi-class clinical triage across four medical image datasets: cells, chest, lesions, and orgs.
+This project recovers and fixes a machine learning system designed to automatically classify medical images. It trains three different AI models to diagnose patients across four types of medical imaging: cell samples, chest X-rays, skin lesions, and organ scans.
 
 **Status:** All bugs fixed ✓ | All accuracy requirements met ✓ | Production-ready ✓
 
@@ -16,12 +16,12 @@ This is the restored and corrected ML pipeline for multi-class clinical triage a
 
 - Python 3.8+
 - PyTorch 1.9+
-- CUDA 11+ (optional, for GPU acceleration)
+- CUDA 11+ (optional, if you're with GPU acceleration)
 
 ## Installation
 
 ```bash
-pip install torch torchvision torch nn numpy
+pip install torch numpy
 ```
 
 ## Project Structure

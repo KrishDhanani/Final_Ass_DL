@@ -8,7 +8,7 @@ Create this file with benchmarks and analysis:
 
 ## Executive Summary
 
-All corrected models exceed minimum accuracy requirements across all four datasets. Model selection should consider both accuracy and computational efficiency.
+All corrected models exceed minimum accuracy requirements across all four datasets. Model selection should consider both accuracy and computational efficiency. 
 
 ## Performance Results Table
 
