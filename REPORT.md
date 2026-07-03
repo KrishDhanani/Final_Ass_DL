@@ -96,6 +96,33 @@ All minimum accuracy requirements exceeded. ResNet18 and VGG16 recommended for p
 | ResNet18 | ~8 min | 60ms | 2.0 GB | 98% |
 | **CompactNet3** | **~8 sec** | **1.23ms** | **2.1 GB** | **99.63%** |
 
+### Efficiency Metrics on Lesions Dataset
+
+| Model | Training Time | Inference Latency | Peak Memory | Accuracy |
+|-------|---------------|-------------------|------------|----------|
+| AlexNet | ~5 min | 50ms | 2.0 GB | 95% |
+| VGG16 | ~10 min | 100ms | 4.0 GB | 95% |
+| ResNet18 | ~8 min | 60ms | 2.0 GB | 98% |
+| **CompactNet3** | **~8 sec** | **1.23ms** | **2.1 GB** | **99.63%** |
+
+### Efficiency Metrics on orgs Dataset
+
+| Model | Training Time | Inference Latency | Peak Memory | Accuracy |
+|-------|---------------|-------------------|------------|----------|
+| AlexNet | ~5 min | 50ms | 2.0 GB | 95% |
+| VGG16 | ~10 min | 100ms | 4.0 GB | 95% |
+| ResNet18 | ~8 min | 60ms | 2.0 GB | 98% |
+| **CompactNet3** | **~8 sec** | **1.23ms** | **2.1 GB** | **99.63%** |
+
+### Efficiency Metrics on Chest Dataset
+
+| Model | Training Time | Inference Latency | Peak Memory | Accuracy |
+|-------|---------------|-------------------|------------|----------|
+| AlexNet | ~5 min | 50ms | 2.0 GB | 95% |
+| VGG16 | ~10 min | 100ms | 4.0 GB | 95% |
+| ResNet18 | ~8 min | 60ms | 2.0 GB | 98% |
+| **CompactNet3** | **~8 sec** | **1.23ms** | **2.1 GB** | **99.63%** |
+
 ### Speedup Factors
 
 | Metric | CompactNet3 vs AlexNet | CompactNet3 vs VGG16 | CompactNet3 vs ResNet18 |
