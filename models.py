@@ -193,6 +193,46 @@ class ResNet18(nn.Module):
         return self.classifier(out)
 
 
+class CompactNet3(nn.Module):
+    """ First with only 2 Layers"""
+    def __init__(self, **kwargs):
+        super().__init__()
+    
+        in_channels = kwargs.get("in_channels", 3)
+        num_classes = kwargs.get("num_classes", 8)
+        drop_rate = kwargs.get("drop_rate", 0.5)
+
+        self.features = nn.Sequential(
+            # Conv Layer 1: in_channel -> 32
+            nn.Conv2d(in_channels, 32, kernel_size=5, stride=2, padding=3),  
+            nn.BatchNorm2d(32),
+            nn.ReLU(inplace=True),
+            nn.MaxPool2d(kernel_size=3, stride=2, padding=1),
+
+            # Conv Layer 2: 32 -> 64
+            nn.Conv2d(32, 64, kernel_size=5, stride=2, padding=3),  
+            nn.BatchNorm2d(64),
+            nn.ReLU(inplace=True),
+            nn.MaxPool2d(kernel_size=3, stride=2, padding=1),
+            
+            # Conv Layer 3: 64 -> 128
+            nn.Conv2d(64, 128, kernel_size=5, stride=2, padding=3),  
+            nn.BatchNorm2d(128),
+            nn.ReLU(inplace=True),
+            nn.MaxPool2d(kernel_size=3, stride=2, padding=1),
+            
+            nn.AdaptiveAvgPool2d((1, 1)),  # ANY size → 1×1
+        )
+            
+        self.classifier = nn.Sequential(
+            nn.Linear(128, num_classes),
+        )
+
+    def forward(self, x):
+        x = self.features(x)
+        x = x.view(x.size(0), -1)  # Flatten
+        x = self.classifier(x)
+        return x
 
 
 

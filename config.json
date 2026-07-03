@@ -1,5 +1,5 @@
 {
-    "DATA": "cells.pt",
+    "DATA": "chest.pt",
 
     "DATA_PATH": "./Data/",
 
@@ -9,9 +9,9 @@
 
     "EPOCHS": 50,
 
-    "MODEL": "ResNet18",
+    "MODEL": "CompactNet3",
 
-    "CHANNELS": 3,
+    "CHANNELS": 1,
 
-    "NUM_CLASSES": 8
+    "NUM_CLASSES": 2
 }

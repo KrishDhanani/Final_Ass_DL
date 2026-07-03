@@ -10,6 +10,7 @@ from torch.utils.data import TensorDataset, DataLoader
 
 def get_loaders(data, data_path, batch_size, val_split=0.1):
     d_path = Path(data_path) / f"{data}"
+    print(d_path)
     data_dict = torch.load(d_path, weights_only=False)
 
     total_samples = data_dict['train_images'].shape[0]

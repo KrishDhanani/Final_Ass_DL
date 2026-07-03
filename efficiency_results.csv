@@ -1,0 +1,2 @@
+timestamp,model,dataset,total_training_time_sec,inference_latency_ms,peak_memory_gb
+2026-07-03 14:13:15,CompactNet3,chest.pt,33.42,0.045,1.38

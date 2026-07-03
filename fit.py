@@ -61,7 +61,6 @@ class Trainer:
         print("-" * 50)
         
         for epoch in range(epochs):
-            print(epoch)
             train_loss, train_acc = self.train_one_epoch(train_loader)
             val_loss, val_acc = self.evaluate(val_loader)
             
