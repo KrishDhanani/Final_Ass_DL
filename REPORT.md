@@ -87,7 +87,7 @@ All minimum accuracy requirements exceeded. ResNet18 and VGG16 recommended for p
 | ResNet18 | 11M | 18+skip | 1 | High |
 | **CompactNet3** | **~1K** | **3** | **1** | **Ultra-Low** |
 
-### Efficiency Metrics on Cells Dataset
+### Efficiency Metrics on **Cells** Dataset
 
 | Model | Training Time | Inference Latency | Peak Memory | Accuracy |
 |-------|---------------|-------------------|------------|----------|
@@ -96,16 +96,16 @@ All minimum accuracy requirements exceeded. ResNet18 and VGG16 recommended for p
 | ResNet18 | ~2131.56 seconds | 0.871 ms per image | 2.18 GBB | ~99.67% |
 | **CompactNet3** | **~95.81 seconds** | **0.049 ms per image** | **2.13 GB** | **~100%** |
 
-### Efficiency Metrics on Lesions Dataset
+### Efficiency Metrics on **Lesions** Dataset
 
 | Model | Training Time | Inference Latency | Peak Memory | Accuracy |
 |-------|---------------|-------------------|------------|----------|
-| AlexNet | ~5 min | 50ms | 2.0 GB | 95% |
-| VGG16 | ~10 min | 100ms | 4.0 GB | 95% |
-| ResNet18 | ~8 min | 60ms | 2.0 GB | 98% |
-| **CompactNet3** | **~8 sec** | **1.23ms** | **2.1 GB** | **99.63%** |
+| AlexNet | ~5263.78 seconds | 4.511 ms per image | 0.97 GB | ~87.60% |
+| VGG16 | ~745.70 seconds | 0.552 ms per image | 1.83 GB | ~95% |
+| ResNet18 | ~1261.18 seconds | 0.900 ms per image | 1.84 GB | ~98% |
+| **CompactNet3** | **~646.17 seconds** | ** 0.604 ms per image** | **0.86 GB** | **99.96%** |
 
-### Efficiency Metrics on orgs Dataset
+### Efficiency Metrics on **orgs** Dataset
 
 | Model | Training Time | Inference Latency | Peak Memory | Accuracy |
 |-------|---------------|-------------------|------------|----------|
