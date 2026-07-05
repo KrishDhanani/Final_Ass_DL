@@ -109,12 +109,12 @@ All minimum accuracy requirements exceeded. ResNet18 and VGG16 recommended for p
 
 | Model | Training Time | Inference Latency | Peak Memory | Accuracy |
 |-------|---------------|-------------------|------------|----------|
-| AlexNet | ~5 min | 50ms | 2.0 GB | 95% |
-| VGG16 | ~10 min | 100ms | 4.0 GB | 95% |
-| ResNet18 | ~8 min | 60ms | 2.0 GB | 98% |
-| **CompactNet3** | **~8 sec** | **1.23ms** | **2.1 GB** | **99.63%** |
+| AlexNet | ~223.08 seconds | 0.064 ms per image | 1.69 GB | ~95% |
+| VGG16 | ~1439.88 seconds |  0.539 ms per image | 1.71 GB | ~96% |
+| ResNet18 | ~2435.69 seconds | 0.910 ms per image | 1.73 GB | ~98% |
+| **CompactNet3** | **~2155.93 seconds** | **1.081 ms per image** | **0.74 GB GB** | **99.63%** |
 
-### Efficiency Metrics on Chest Dataset
+### Efficiency Metrics on Chest Dataset  (cpu...)
 
 | Model | Training Time | Inference Latency | Peak Memory | Accuracy |
 |-------|---------------|-------------------|------------|----------|
