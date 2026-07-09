@@ -5,6 +5,8 @@ MG 6/6/2026
 """
 import torch
 import torch.nn as nn
+import torchvision
+import torchvision.models as models
 
 activation_str = "ReLU"  # Placeholder for activation function, can be replaced with "ReLU" or others as needed.
 
@@ -234,6 +236,72 @@ class CompactNet3(nn.Module):
         x = self.classifier(x)
         return x
 
+
+class Transfer_learning_AlexNet(nn.Module):
+    def __init__(self, **kwargs):
+        super().__init__()
+        
+        in_channels = kwargs.get("in_channels", 1)
+        num_classes = kwargs.get("num_classes", 8)
+    
+        self.pre_alex = models.alexnet(pretrained=True)
+        self.pre_alex.features[0] = nn.Conv2d(in_channels, 64, kernel_size=(11, 11), stride=(4, 4), padding=(2, 2))
+        self.pre_alex.classifier[1] = nn.Linear(in_features=9216, out_features=4096, bias=True)          # 9216 = 256 × 6 × 6
+        self.pre_alex.classifier[-1] = nn.Linear(in_features=4096, out_features=num_classes, bias=True)
+        print(self.pre_alex)
+
+        total_params = 0
+        frozen_params = 0
+        
+        for name, param in self.pre_alex.features[4:].named_parameters():
+            param.requires_grad = False
+            
+        # print(id(self.pre_alex.features[1]))      # clarifying about not copy
+        # print(id(self.pre_alex.features[1:][0])) 
+        
+        for name, param in self.pre_alex.named_parameters():
+            total_params += param.numel()
+            
+            if not param.requires_grad:
+                frozen_params += param.numel()
+            
+            print(name, param.requires_grad)
+        print(f"Percentage of frozen param {((frozen_params / total_params)*100):.2f}%")
+
+    def forward(self, x):
+        x = self.pre_alex.features(x)
+        x = self.pre_alex.avgpool(x)
+        x = torch.flatten(x, 1)      
+        return self.pre_alex.classifier(x)
+
+
+class Transfer_learning_VGG16(nn.Module):
+    def __init__(self, **kwargs):
+        super().__init__()
+
+        in_channels = kwargs.get("in_channels", 1)
+        num_classes = kwargs.get("num_classes", 8)
+
+        self.pre_vgg = models.vgg16(pretrained=True)
+        self.pre_vgg.features[0] = nn.Conv2d(in_channels, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1))
+        self.pre_vgg.classifier[-1] = nn.Linear(in_features=4096, out_features=num_classes, bias=True)
+        param = list(self.pre_vgg.parameters())
+        print(f"Length of parameter: {len(param)}")
+        
+        print(self.pre_vgg)
+        
+        for name, param in self.pre_vgg.features[1:].named_parameters():
+            param.requires_grad = False
+        
+        for name,param in self.pre_vgg.named_parameters():
+            print(name, param.requires_grad)
+            
+        
+    def forward(self, x):
+        x = self.pre_vgg.features(x)
+        x = self.pre_vgg.avgpool(x)
+        x = torch.flatten(x, 1)      
+        return self.pre_vgg.classifier(x)
 
 
 # Info. ALEXNET

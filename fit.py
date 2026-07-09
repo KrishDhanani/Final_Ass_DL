@@ -18,6 +18,8 @@ class Trainer:
         correct, sum = 0, 0
         
         for images, labels in dataloader:
+            self.optimizer.zero_grad()      # Line Added
+            
             images, labels = images.to(self.device), labels.to(self.device)
             labels = labels.squeeze(1)       # this line added to match size with our original labels shape which is [32,1] before squeeze it is [32,2]
             
@@ -25,7 +27,6 @@ class Trainer:
             # print(f"outputs shape: {outputs.shape}, labels shape: {labels.shape}")
             loss = self.criterion(outputs, labels)
             
-            self.optimizer.zero_grad()      # Line Added
             loss.backward()
             self.optimizer.step()
             

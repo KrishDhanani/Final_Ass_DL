@@ -1,17 +1,19 @@
 {
-    "DATA": "chest.pt",
+    "DATA": "organs.pt",
 
     "DATA_PATH": "./Data/",
 
     "BATCH_SIZE": 32,
 
-    "LEARNING_RATE": 0.01,
+    "LEARNING_RATE": 0.001,
 
     "EPOCHS": 50,
 
-    "MODEL": "CompactNet3",
+    "MODEL": "Transfer_learning_VGG16",
 
     "CHANNELS": 1,
 
-    "NUM_CLASSES": 2
+    "NUM_CLASSES": 11,
+    
+    "FRACTION": 0.5
 }

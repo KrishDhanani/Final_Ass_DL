@@ -80,9 +80,7 @@ def print_efficiency_results(model_name, dataset_name, total_time, inference_lat
     print("="*70 + "\n")
 
 
-def main():   
-    with open("./config.json", "r") as f:
-        config = json.load(f)
+def run_experiment(config):   
     
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")       # Device agnostic
     print(f"Training executing on device: {device}")
@@ -90,7 +88,8 @@ def main():
     train_loader, val_loader, _ = get_loaders(
         data=config["DATA"], 
         data_path=config["DATA_PATH"], 
-        batch_size=config["BATCH_SIZE"]
+        batch_size=config["BATCH_SIZE"],
+        fraction=config.get("FRACTION", 1.0)
     )
     
     model_class = getattr(models, config["MODEL"])
@@ -105,27 +104,23 @@ def main():
     optimizer = optim.Adam(model.parameters(), lr=config["LEARNING_RATE"])
     trainer = Trainer(model, criterion, optimizer, device)
     
-    # ========== EFFICIENCY TRACKING: START ==========
-    process = psutil.Process(os.getpid())
+    process = psutil.Process(os.getpid())   # EFFICIENCY TRACKING: START 
     training_start = time.time()
     peak_memory_training = 0
     
-    # ========== TRAINING ==========
-    trainer.fit(train_loader, val_loader, epochs=config["EPOCHS"])
+    trainer.fit(train_loader, val_loader, epochs=config["EPOCHS"])  # TRAINING 
     
-    # ========== EFFICIENCY TRACKING: DURING TRAINING ==========
-    training_end = time.time()
+    training_end = time.time()      # EFFICIENCY TRACKING: DURING TRAINING
     total_training_time = training_end - training_start
     peak_memory_training = process.memory_info().rss / 1e9      # Devided by 1e9 bcs of bytes formate of billion
     
-    # ========== EFFICIENCY TRACKING: INFERENCE ==========
-    print("\nMeasuring inference efficiency...")
+    print("\nMeasuring inference efficiency...")    # EFFICIENCY TRACKING: INFERENCE 
     inference_latency, inference_memory_peak = track_efficiency(model, val_loader, device)
     
     # Peak memory is the max of training and inference
     peak_memory_overall = max(peak_memory_training, inference_memory_peak)
     
-    # ========== SAVE & PRINT RESULTS ==========
+    # SAVE & PRINT RESULTS
     results = save_efficiency_results(
         model_name=config["MODEL"],
         dataset_name=config["DATA"],
@@ -142,6 +137,34 @@ def main():
         peak_memory=peak_memory_overall
     )
 
+    return results
+    
+    
+
+def load_config_and_run():
+    with open("./benchmark_config.json", "r") as f:
+        config = json.load(f)
+    
+    results_list = []
+    
+    for model_name in config["MODELS"]:
+        for fraction in config["FRACTIONS"]:
+            run_config = {
+                "DATA": config["DATA"],
+                "DATA_PATH": config["DATA_PATH"],
+                "BATCH_SIZE": config["BATCH_SIZE"],
+                "LEARNING_RATE": config["LEARNING_RATE"],
+                "EPOCHS": config["EPOCHS"],
+                "MODEL": model_name,
+                "FRACTION": fraction,
+                "CHANNELS": config["CHANNELS"],
+                "NUM_CLASSES": config["NUM_CLASSES"]
+            }
+            print(run_config)
+            result = run_experiment(run_config)
+            results_list.append(result)
+    
+    return results_list
 
 if __name__ == "__main__":
-    main()
+    load_config_and_run()

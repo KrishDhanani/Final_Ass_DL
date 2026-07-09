@@ -1,0 +1,11 @@
+{
+    "DATA": "organs.pt",
+    "DATA_PATH": "./Data/",
+    "BATCH_SIZE": 32,
+    "LEARNING_RATE": 0.001,
+    "EPOCHS": 50,
+    "MODELS": ["AlexNet", "Transfer_learning_AlexNet", "VGG16", "Transfer_learning_VGG16"],
+    "FRACTIONS": [1.0, 0.5, 0.25, 0.1],
+    "CHANNELS": 1,
+    "NUM_CLASSES": 11
+}
